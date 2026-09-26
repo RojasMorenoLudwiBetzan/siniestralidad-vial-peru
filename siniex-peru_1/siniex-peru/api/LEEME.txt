@@ -1,0 +1,28 @@
+API SINIEX PERU  ->  PostgreSQL
+===============================
+
+1) Credenciales
+   copy .env.example .env        (Windows)
+   cp   .env.example .env        (Linux / Mac)
+   Edita .env con tu host, base, usuario y password.
+
+2) Dependencias
+   pip install -r requirements.txt
+
+3) Levantar la API
+   python app.py
+   Queda en http://localhost:5000
+
+4) En la web: pestaña "Conexión de datos"
+   - Probar conexión           -> verifica que la base responde
+   - Cargar datos de PostgreSQL -> reemplaza los datos demo por los reales
+
+IMPORTANTE
+   Para que el navegador permita la llamada, abre la web con:
+       python servidor.py        (en la carpeta del sitio)
+   y entra a http://localhost:8000
+   Abriendo index.html con doble clic el mapa funciona, pero la conexión
+   a la API puede ser bloqueada por el navegador (política file://).
+
+Si tus tablas tienen otros nombres o columnas, edita las consultas en
+app.py (SQL_ROWS, SQL_MAPA, SQL_PUNTOS) o toma las de sql/consultas.sql.

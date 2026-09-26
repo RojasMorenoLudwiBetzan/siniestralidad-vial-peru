@@ -1,0 +1,144 @@
+/* ============ SINIEX PERÚ · mapa + conexión de datos ============ */
+
+/* ---------- contenedor del mapa ---------- */
+.map-holder{position:relative;flex:1;display:flex;min-height:330px}
+.map-slot{
+  position:relative;flex:1;min-height:330px;border-radius:12px;overflow:hidden;
+  border:1px solid #1e3357;
+  background:
+    radial-gradient(ellipse 700px 500px at 30% 30%, rgba(59,90,180,.18), transparent 60%),
+    radial-gradient(ellipse 600px 500px at 75% 75%, rgba(120,40,160,.12), transparent 60%),
+    #07101f;
+}
+.map-slot.big{min-height:520px}
+.leaflet-container{background:transparent;font-family:inherit;outline:none}
+.leaflet-control-zoom{border:none!important;margin:0 12px 12px 0!important}
+.leaflet-control-zoom a{
+  background:rgba(13,19,48,.88)!important;color:#e7ebff!important;
+  border:1px solid #1c2550!important;backdrop-filter:blur(8px);
+  width:30px!important;height:30px!important;line-height:28px!important;font-size:16px!important
+}
+.leaflet-control-zoom a:hover{background:rgba(30,48,110,.95)!important}
+
+/* carga / error */
+.map-loading,.map-error{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;color:var(--dim);font-size:12.5px;text-align:center;padding:20px
+}
+.map-error{color:#f0b7b7;line-height:1.6}
+.map-error code{color:var(--cyan)}
+.map-loading .spin{
+  width:30px;height:30px;border:3px solid #1c2550;border-top-color:var(--red);border-radius:50%;
+  animation:sp .9s linear infinite;display:block
+}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* chip de nivel + botón inicio */
+.map-chip{
+  position:absolute;left:12px;top:12px;z-index:600;
+  background:rgba(13,19,48,.85);border:1px solid #1c2550;border-radius:9px;
+  padding:7px 11px;font-size:11px;color:#c7cdf5;backdrop-filter:blur(8px);pointer-events:none
+}
+.map-home{
+  position:absolute;left:12px;top:50px;z-index:600;width:32px;height:32px;border-radius:9px;
+  background:rgba(13,19,48,.85);border:1px solid #1c2550;color:#c7cdf5;cursor:pointer;
+  display:grid;place-items:center;backdrop-filter:blur(8px)
+}
+.map-home:hover{color:#fff;border-color:#3b6ef6}
+.map-home svg{width:16px;height:16px}
+
+/* panel flotante con el detalle */
+.map-info{
+  position:absolute;right:12px;top:12px;z-index:600;width:212px;
+  background:rgba(13,19,48,.9);border:1px solid #1c2550;border-radius:12px;padding:13px 14px;
+  backdrop-filter:blur(10px);box-shadow:0 12px 32px rgba(0,0,0,.5)
+}
+.map-info b#miName{display:block;font-size:16px;font-weight:800}
+.map-info span#miLevel{display:block;font-size:10px;color:#4f6bf0;text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:8px}
+.mi-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #1c2550;font-size:11.5px;color:var(--muted)}
+.mi-row b{font-size:13px;color:#e7ebff}
+.mi-row b.red{color:#f87171}
+
+/* interruptores de capas */
+.map-switches{display:flex;gap:12px;flex-wrap:wrap}
+.sw{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);cursor:pointer}
+.sw input{accent-color:#3b6ef6}
+
+/* tooltips y etiquetas Leaflet */
+.tt-siniex{
+  background:#0d1330!important;color:#e7ebff!important;border:1px solid #1c2550!important;
+  border-radius:8px!important;font-size:11.5px!important;padding:7px 9px!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.55)!important
+}
+.tt-siniex::before{border-top-color:#0d1330!important}
+.label-dep span{
+  color:#c7cdf5;font-size:10px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;
+  text-shadow:0 0 6px rgba(0,0,0,.9),0 0 3px rgba(0,0,0,.9);
+  white-space:nowrap;transform:translate(-50%,10px);display:block;pointer-events:none
+}
+.marker-pulse{animation:pulseGlow 1.8s ease-in-out infinite}
+@keyframes pulseGlow{
+  0%{filter:drop-shadow(0 0 0 #dc2626)}
+  50%{filter:drop-shadow(0 0 8px #dc2626)}
+  100%{filter:drop-shadow(0 0 0 #dc2626)}
+}
+
+/* ---------- vista de conexión ---------- */
+.conn-state{
+  font-size:11px;padding:7px 12px;border-radius:999px;white-space:nowrap;
+  background:#132444;border:1px solid var(--line);color:var(--muted)
+}
+.conn-state.ok{background:#0d2f22;border-color:#1f7a54;color:#4ade80}
+.conn-state.err{background:#2f1418;border-color:#7a2130;color:#f87171}
+.conn-state.wait{background:#2a2410;border-color:#7a6320;color:#ffd23f}
+
+.conn-form{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+.field{display:flex;flex-direction:column;gap:6px;max-width:420px}
+.field span{font-size:11px;color:var(--muted)}
+.field input{
+  background:#0f1c33;border:1px solid var(--line);border-radius:9px;padding:10px 12px;
+  font-size:12.5px;outline:none;color:var(--txt)
+}
+.field input:focus{border-color:#3b6ef6}
+.check{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);cursor:pointer}
+.check input{accent-color:#3b6ef6}
+.conn-actions{display:flex;gap:9px;flex-wrap:wrap}
+.conn-actions .btn-primary:disabled,.conn-actions .btn-ghost:disabled{opacity:.45;cursor:default}
+
+.log{
+  margin-top:14px;background:#070e1c;border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;max-height:180px;overflow:auto;font-family:ui-monospace,Consolas,monospace;font-size:11px
+}
+.log:empty{display:none}
+.log-line{color:var(--muted);padding:2px 0;border-bottom:1px solid #0e1a2e}
+.log-line.ok{color:#4ade80}
+.log-line.err{color:#f87171}
+
+.code{
+  background:#070e1c;border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+  font-family:ui-monospace,Consolas,monospace;font-size:11.5px;line-height:1.55;color:#b9ccea;
+  overflow:auto;margin:0 0 12px;white-space:pre
+}
+.code.small{font-size:11px}
+.prose code{background:#0c1528;border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--cyan);font-size:11.5px}
+.tbl code{color:var(--cyan);font-size:11.5px}
+
+@media (max-width:820px){
+  .map-info{position:static;width:auto;margin-top:10px}
+  .map-slot.big{min-height:380px}
+}
+
+/* la capa de calor no debe capturar los clics del mapa */
+.leaflet-heatmap-layer{pointer-events:none!important}
+
+/* etiquetas de provincia y distrito (niveles de zoom) */
+.label-prov span{
+  color:#c7cdf5;font-size:9.5px;font-weight:600;letter-spacing:.2px;text-transform:uppercase;
+  text-shadow:0 0 6px rgba(0,0,0,.9),0 0 3px rgba(0,0,0,.9);
+  white-space:nowrap;transform:translate(-50%,8px);display:block;pointer-events:none
+}
+.label-dist span{
+  color:#a9b1e0;font-size:9px;font-weight:500;
+  text-shadow:0 0 5px rgba(0,0,0,.9),0 0 3px rgba(0,0,0,.9);
+  white-space:nowrap;transform:translate(-50%,7px);display:block;pointer-events:none
+}

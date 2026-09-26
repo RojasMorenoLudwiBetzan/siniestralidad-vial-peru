@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SINIEX PERÚ · Plataforma Nacional de Análisis de Siniestralidad Vial</title>
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/mapa.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 48 56" width="34" height="40">
+          <path d="M24 2 L44 10 V30 C44 43 34 50 24 54 C14 50 4 43 4 30 V10 Z" fill="url(#g1)" stroke="#ff3b5c" stroke-width="2"/>
+          <path d="M24 12 C20 20 18 26 18 32 C18 38 21 42 24 44 C27 42 30 38 30 32 C30 26 28 20 24 12 Z" fill="#ff3b5c" opacity=".85"/>
+          <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#12203f"/><stop offset="1" stop-color="#0a1428"/>
+          </linearGradient></defs>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>SINIEX <span>PERÚ</span></h1>
+        <p>Plataforma Nacional de<br>Análisis de Siniestralidad Vial</p>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <button class="nav-item active" data-view="overview">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
+        <span>Visión general</span>
+      </button>
+      <button class="nav-item" data-view="geo">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M9 3 3 5v16l6-2 6 2 6-2V3l-6 2-6-2zm0 2.2 6 2v13.6l-6-2z"/></svg>
+        <span>Explorador geográfico</span>
+      </button>
+      <button class="nav-item" data-view="analysis">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M3 17l6-6 4 4 8-8v4l-8 8-4-4-6 6z"/><path d="M3 20h18v1.5H3z"/></svg>
+        <span>Análisis</span>
+      </button>
+      <button class="nav-item" data-view="reports">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M6 2h8l6 6v14H6zM14 2v6h6"/></svg>
+        <span>Reportes</span>
+      </button>
+      <button class="nav-item" data-view="conexion">
+        <svg viewBox="0 0 24 24" class="ic"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+        <span>Conexión de datos</span>
+      </button>
+      <button class="nav-item" data-view="about">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2zm0-8h-2V7h2z"/></svg>
+        <span>Acerca del sistema</span>
+      </button>
+    </nav>
+
+    <div class="side-art">
+      <svg viewBox="0 0 160 200" preserveAspectRatio="xMidYMid meet">
+        <g id="sideDots"></g>
+      </svg>
+    </div>
+
+    <div class="source-box">
+      <div class="src-ic">
+        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+      </div>
+      <p class="src-title">Fuente de datos</p>
+      <p class="src-main">ONSV <span>/</span> INEI</p>
+      <p class="src-sub">Observatorio Nacional de Seguridad Vial<br>Instituto Nacional de Estadística e Informática</p>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <main class="main">
+
+    <header class="topbar">
+      <div class="title-block">
+        <h2 id="viewTitle">Visión general</h2>
+        <p id="viewSub">Análisis de siniestralidad vial fatal en el Perú, 2021–2025</p>
+      </div>
+
+      <div class="filters">
+        <label class="filter">
+          <svg viewBox="0 0 24 24" class="fic"><path d="M7 2v3M17 2v3M3 9h18M4 5h16v16H4z"/></svg>
+          <select id="fYear">
+            <option value="all">2021 – 2025</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+          </select>
+        </label>
+
+        <label class="filter">
+          <svg viewBox="0 0 24 24" class="fic"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
+          <select id="fRegion"><option value="all">Región: todas</option></select>
+        </label>
+
+        <label class="filter">
+          <svg viewBox="0 0 24 24" class="fic"><path d="M3 13l2-5a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 5v5h-3a2 2 0 0 1-4 0H8a2 2 0 0 1-4 0H3z"/></svg>
+          <select id="fVehicle"><option value="all">Tipo de vehículo: todos</option></select>
+        </label>
+
+        <label class="filter">
+          <svg viewBox="0 0 24 24" class="fic"><path d="M3 4h18l-7 8v7l-4 2v-9z"/></svg>
+          <select id="fCause"><option value="all">Causa: todas</option></select>
+        </label>
+
+        <div class="update-box">
+          <p>Datos actualizados con<br>última carga ONSV</p>
+          <p class="src-inline">ONSV <span>/</span> INEI</p>
+        </div>
+
+        <button class="btn-reset" id="btnReset" title="Limpiar filtros">Limpiar</button>
+      </div>
+    </header>
+
+    <div class="scroll">
+
+      <!-- ---------- VISTA: VISIÓN GENERAL ---------- -->
+      <section class="view active" id="view-overview">
+
+        <div class="kpi-row">
+          <article class="kpi kpi-blue">
+            <div class="kpi-ic">
+              <svg viewBox="0 0 24 24"><path d="M3 13l2-5a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 5v5h-3a2 2 0 0 1-4 0H8a2 2 0 0 1-4 0H3z"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">SINIESTROS FATALES <i class="info" data-tip="Número de eventos de tránsito con al menos un fallecido.">i</i></p>
+              <p class="kpi-value" id="kpiSiniestros">0</p>
+              <p class="kpi-foot" id="kpiSiniestrosFoot">Total 2021–2025</p>
+            </div>
+            <div class="kpi-spark" id="sparkSiniestros"></div>
+          </article>
+
+          <article class="kpi kpi-purple">
+            <div class="kpi-ic">
+              <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><circle cx="16.5" cy="9" r="2.6"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5zM15 20c0-2.4 1-4.2 3-4.9 1.9.6 3 2.4 3 4.9z"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">FALLECIDOS <i class="info" data-tip="Personas fallecidas registradas en los siniestros filtrados.">i</i></p>
+              <p class="kpi-value" id="kpiFallecidos">0</p>
+              <p class="kpi-foot" id="kpiFallecidosFoot">Total 2021–2025</p>
+            </div>
+            <div class="kpi-spark" id="sparkFallecidos"></div>
+          </article>
+
+          <article class="kpi kpi-teal">
+            <div class="kpi-ic">
+              <svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.4 8.8 8 10 4.6-1.2 8-5 8-10V5z"/></svg>
+            </div>
+            <div class="kpi-body">
+              <p class="kpi-label">TASA DE SINIESTRALIDAD <i class="info" data-tip="Fallecidos por cada 100 mil habitantes en el ámbito filtrado.">i</i></p>
+              <p class="kpi-value" id="kpiTasa">0</p>
+              <p class="kpi-foot">por cada 100 mil habitantes</p>
+            </div>
+            <div class="kpi-spark" id="sparkTasa"></div>
+          </article>
+
+          <article class="kpi kpi-gold">
+            <div class="kpi-body wide">
+              <p class="kpi-label"><span class="crown">♛</span> MAYOR SINIESTRALIDAD <i class="info" data-tip="Departamento con más siniestros fatales según los filtros activos.">i</i></p>
+              <p class="kpi-value gold" id="kpiTopRegion">—</p>
+              <p class="kpi-foot"><b id="kpiTopValue">0</b> siniestros fatales</p>
+            </div>
+            <div class="kpi-mini-map" id="kpiMiniMap"></div>
+          </article>
+        </div>
+
+        <div class="grid-2">
+          <!-- Ranking -->
+          <article class="card card-ranking">
+            <header class="card-head">
+              <h3>RANKING DE REGIONES <i class="info" data-tip="Ordenado por número de siniestros fatales.">i</i></h3>
+              <p class="card-sub">Por número de siniestros fatales<br><span id="rankRange">(2021–2025)</span></p>
+            </header>
+            <ol class="rank-list" id="rankList"></ol>
+            <button class="btn-ghost" id="btnRankAll">Ver ranking completo <span>›</span></button>
+          </article>
+
+          <!-- Mapa: espacio reservado (vacío) -->
+          <article class="card card-map">
+            <header class="card-head row">
+              <div>
+                <h3>MAPA DE SINIESTRALIDAD EN PERÚ <i class="info" data-tip="Espacio reservado para el mapa interactivo.">i</i></h3>
+                <p class="card-sub">Interacción por departamento</p>
+              </div>
+              <div class="seg">
+                <button class="seg-btn active" title="Vista mapa">
+                  <svg viewBox="0 0 24 24"><path d="M12 2 4 5v7c0 5 3.4 8.8 8 10 4.6-1.2 8-5 8-10V5z"/></svg>
+                </button>
+                <button class="seg-btn" title="Vista tabla">
+                  <svg viewBox="0 0 24 24"><path d="M3 5h18v2H3zm0 6h18v2H3zm0 6h18v2H3z"/></svg>
+                </button>
+              </div>
+            </header>
+
+            <!-- ======= MAPA INTERACTIVO (Leaflet) ======= -->
+            <div class="map-holder">
+              <div class="map-slot" id="mapSlot"></div>
+              <div class="map-chip" id="mapChip">Departamentos</div>
+              <button class="map-home" id="btnMapHome" title="Ver todo el Perú">
+                <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
+              </button>
+            </div>
+
+            <div class="legend">
+              <p>Intensidad de siniestros: <span>Baja</span><span class="right">Alta</span></p>
+              <div class="legend-bar"></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="grid-2">
+          <!-- Evolución -->
+          <article class="card">
+            <header class="card-head row">
+              <h3>EVOLUCIÓN DE SINIESTROS FATALES <i class="info" data-tip="Serie anual según filtros activos.">i</i></h3>
+              <select class="mini-select" id="evoMetric">
+                <option value="siniestros">Ver: Siniestros</option>
+                <option value="fallecidos">Ver: Fallecidos</option>
+              </select>
+            </header>
+            <div class="chart" id="chartEvo"></div>
+            <p class="note">* Cifras preliminares 2024–2025</p>
+          </article>
+
+          <!-- Causas -->
+          <article class="card">
+            <header class="card-head row">
+              <h3>PRINCIPALES CAUSAS DE SINIESTROS <i class="info" data-tip="Distribución por causa o factor principal.">i</i></h3>
+              <select class="mini-select" id="causeMetric">
+                <option value="pct">Ver: % del total</option>
+                <option value="abs">Ver: Cantidad</option>
+              </select>
+            </header>
+            <div class="causes-wrap">
+              <div class="causes-bars" id="causeBars"></div>
+              <div class="donut-wrap">
+                <div id="causeDonut"></div>
+                <p class="donut-hint">Seleccione una causa<br>para filtrar el mapa</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ---------- VISTA: EXPLORADOR GEOGRÁFICO ---------- -->
+      <section class="view" id="view-geo">
+        <div class="grid-geo">
+          <article class="card card-map tall">
+            <header class="card-head row">
+              <div>
+                <h3>EXPLORADOR GEOGRÁFICO</h3>
+                <p class="card-sub">Zoom: departamentos → provincias → siniestros individuales. Clic en un departamento para filtrar todo el tablero.</p>
+              </div>
+              <div class="map-switches">
+                <label class="sw"><input type="checkbox" id="swCalor" checked> Mapa de calor</label>
+                <label class="sw"><input type="checkbox" id="swEtiquetas" checked> Etiquetas</label>
+              </div>
+            </header>
+            <!-- ======= MAPA INTERACTIVO (Leaflet) ======= -->
+            <div class="map-holder">
+              <div class="map-slot big" id="mapSlotGeo"></div>
+              <div class="map-chip" id="mapChipGeo">Departamentos</div>
+              <button class="map-home" id="btnMapHomeGeo" title="Ver todo el Perú">
+                <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
+              </button>
+              <div class="map-info" id="mapInfo">
+                <b id="miName">Perú</b>
+                <span id="miLevel">Nacional</span>
+                <div class="mi-row"><span>Siniestros fatales</span><b id="miSin">—</b></div>
+                <div class="mi-row"><span>Fallecidos</span><b class="red" id="miFal">—</b></div>
+                <div class="mi-row"><span>Tasa /100k</span><b id="miTasa">—</b></div>
+              </div>
+            </div>
+            <div class="legend">
+              <p>Intensidad de siniestros: <span>Baja</span><span class="right">Alta</span></p>
+              <div class="legend-bar"></div>
+            </div>
+          </article>
+
+          <article class="card">
+            <header class="card-head row">
+              <h3>DETALLE POR DEPARTAMENTO</h3>
+              <input class="search" id="geoSearch" type="search" placeholder="Buscar departamento…">
+            </header>
+            <div class="table-wrap">
+              <table class="tbl" id="geoTable">
+                <thead>
+                  <tr>
+                    <th data-sort="nombre">Departamento</th>
+                    <th data-sort="siniestros" class="num">Siniestros</th>
+                    <th data-sort="fallecidos" class="num">Fallecidos</th>
+                    <th data-sort="tasa" class="num">Tasa /100k</th>
+                    <th class="num">Participación</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ---------- VISTA: ANÁLISIS ---------- -->
+      <section class="view" id="view-analysis">
+        <div class="grid-2">
+          <article class="card">
+            <header class="card-head"><h3>SINIESTROS POR TIPO DE VEHÍCULO</h3></header>
+            <div class="causes-bars" id="vehBars"></div>
+          </article>
+
+          <article class="card">
+            <header class="card-head"><h3>DISTRIBUCIÓN POR ZONA</h3></header>
+            <div class="causes-wrap">
+              <div class="causes-bars" id="zonaBars"></div>
+              <div class="donut-wrap"><div id="zonaDonut"></div></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="grid-2">
+          <article class="card">
+            <header class="card-head"><h3>SINIESTROS POR MES</h3></header>
+            <div class="chart" id="chartMes"></div>
+          </article>
+
+          <article class="card">
+            <header class="card-head"><h3>SINIESTROS POR FRANJA HORARIA</h3></header>
+            <div class="chart" id="chartHora"></div>
+          </article>
+        </div>
+
+        <article class="card">
+          <header class="card-head"><h3>CAUSA PRINCIPAL POR AÑO</h3></header>
+          <div class="table-wrap">
+            <table class="tbl" id="crossTable">
+              <thead></thead><tbody></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <!-- ---------- VISTA: REPORTES ---------- -->
+      <section class="view" id="view-reports">
+        <article class="card">
+          <header class="card-head row">
+            <div>
+              <h3>REPORTE DETALLADO</h3>
+              <p class="card-sub">Registros agregados según los filtros activos</p>
+            </div>
+            <div class="head-actions">
+              <span class="pill" id="reportCount">0 filas</span>
+              <button class="btn-primary" id="btnCsv">Descargar CSV</button>
+              <button class="btn-ghost inline" id="btnPrint">Imprimir / PDF</button>
+            </div>
+          </header>
+          <div class="table-wrap tall">
+            <table class="tbl" id="reportTable">
+              <thead>
+                <tr>
+                  <th data-sort="anio">Año</th>
+                  <th data-sort="departamento">Departamento</th>
+                  <th data-sort="vehiculo">Tipo de vehículo</th>
+                  <th data-sort="causa">Causa principal</th>
+                  <th data-sort="zona">Zona</th>
+                  <th data-sort="siniestros" class="num">Siniestros</th>
+                  <th data-sort="fallecidos" class="num">Fallecidos</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="pager">
+            <button id="pagPrev">‹ Anterior</button>
+            <span id="pagInfo">1 / 1</span>
+            <button id="pagNext">Siguiente ›</button>
+          </div>
+        </article>
+      </section>
+
+      <!-- ---------- VISTA: CONEXIÓN DE DATOS ---------- -->
+      <section class="view" id="view-conexion">
+
+        <article class="card">
+          <header class="card-head row">
+            <div>
+              <h3>CONEXIÓN A POSTGRESQL</h3>
+              <p class="card-sub">Conecta el tablero a tu base de datos real. Mientras no conectes, la web usa los datos locales de <code>js/data.js</code>.</p>
+            </div>
+            <span class="conn-state" id="apiEstado">Usando datos locales (data.js)</span>
+          </header>
+
+          <div class="conn-form">
+            <label class="field">
+              <span>URL del backend</span>
+              <input id="apiUrl" type="text" placeholder="http://localhost:5000">
+            </label>
+            <label class="check"><input type="checkbox" id="apiAuto"> Conectar automáticamente al abrir la web</label>
+            <div class="conn-actions">
+              <button class="btn-primary" id="btnProbar">Probar conexión</button>
+              <button class="btn-primary" id="btnCargar">Cargar datos de PostgreSQL</button>
+              <button class="btn-ghost inline" id="btnVolverDemo">Volver a datos locales</button>
+            </div>
+          </div>
+
+          <div class="cover-row" id="apiInfo"></div>
+          <div class="log" id="apiLog"></div>
+        </article>
+
+        <div class="grid-2">
+          <article class="card">
+            <header class="card-head row">
+              <h3>PASO 1 · CREDENCIALES (api/.env)</h3>
+              <button class="btn-ghost inline" id="btnCopiarEnv">Copiar</button>
+            </header>
+            <pre class="code" id="bloqueEnv">PGHOST=localhost
+PGPORT=5432
+PGDATABASE=siniex
+PGUSER=postgres
+PGPASSWORD=tu_password
+PGSCHEMA=public
+API_PORT=5000</pre>
+            <div class="prose">
+              <p><b>Paso 2 · Levantar el backend</b></p>
+              <pre class="code small">cd api
+pip install -r requirements.txt
+python app.py</pre>
+              <p><b>Paso 3</b> · Vuelve aquí, pulsa <b>Probar conexión</b> y luego <b>Cargar datos de PostgreSQL</b>.</p>
+              <p class="warn">Si abres index.html con doble clic, el navegador puede bloquear la llamada al backend (CORS/file://). Levanta la web con <code>python servidor.py</code> y entra a <code>http://localhost:8000</code>.</p>
+            </div>
+          </article>
+
+          <article class="card">
+            <header class="card-head row">
+              <h3>CONSULTA QUE ALIMENTA EL TABLERO</h3>
+              <button class="btn-ghost inline" id="btnCopiarSql">Copiar</button>
+            </header>
+            <pre class="code" id="bloqueSql">SELECT
+  EXTRACT(YEAR FROM s.fecha_siniestro)::int      AS anio,
+  d.departamento                                 AS dep,
+  COALESCE(v.vehiculo, 'Sin registro')           AS veh,
+  COALESCE(s.causa_factor_principal, 'Otras')    AS cau,
+  COALESCE(s.zona, 'Sin registro')               AS zona,
+  EXTRACT(MONTH FROM s.fecha_siniestro)::int     AS mes,
+  LEFT(s.hora_siniestro, 2)::int / 3             AS franja,
+  COUNT(DISTINCT s.codigo_siniestro)             AS siniestros,
+  SUM(s.cantidad_de_fallecidos)                  AS fallecidos
+FROM siniestros s
+JOIN distritos    di ON di.id_distrito   = s.id_distrito
+JOIN provincias   p  ON p.id_provincia   = di.id_provincia
+JOIN departamentos d ON d.id_departamento = p.id_departamento
+LEFT JOIN vehiculos v ON v.codigo_siniestro = s.codigo_siniestro
+GROUP BY 1,2,3,4,5,6,7;</pre>
+            <div class="prose">
+              <p>Está lista en <code>api/sql/consultas.sql</code> junto con las del mapa, el ranking y los puntos georreferenciados. Ajusta solo los nombres de tabla si tu esquema difiere.</p>
+            </div>
+          </article>
+        </div>
+
+        <article class="card">
+          <header class="card-head"><h3>ENDPOINTS DISPONIBLES</h3></header>
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Endpoint</th><th>Devuelve</th><th>Alimenta</th></tr></thead>
+              <tbody>
+                <tr><td><code>GET /api/health</code></td><td>estado de la conexión y conteos</td><td>botón "Probar conexión"</td></tr>
+                <tr><td><code>GET /api/rows</code></td><td>filas agregadas (año, dep, vehículo, causa, zona, mes, hora)</td><td>KPIs, ranking, gráficos, reportes</td></tr>
+                <tr><td><code>GET /api/mapa</code></td><td>siniestros y fallecidos por departamento</td><td>coloreado del mapa</td></tr>
+                <tr><td><code>GET /api/puntos</code></td><td>coordenadas de cada siniestro</td><td>capa de calor y puntos</td></tr>
+                <tr><td><code>GET /api/filtros</code></td><td>años, departamentos, vehículos y causas</td><td>selectores del encabezado</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <!-- ---------- VISTA: ACERCA ---------- -->
+      <section class="view" id="view-about">
+        <div class="grid-2">
+          <article class="card">
+            <header class="card-head"><h3>ACERCA DEL SISTEMA</h3></header>
+            <div class="prose">
+              <p><b>SINIEX PERÚ</b> es una plataforma de análisis de siniestralidad vial fatal construida sobre los registros del <b>Observatorio Nacional de Seguridad Vial (ONSV)</b> y proyecciones poblacionales del <b>INEI</b>.</p>
+              <p>El tablero permite filtrar por periodo, región, tipo de vehículo y causa principal, y recalcula todos los indicadores, rankings y gráficos en tiempo real.</p>
+              <p>El <b>mapa</b> está construido con Leaflet sobre geometrías oficiales del Perú (departamentos y provincias) y 9,106 siniestros georreferenciados: choropleth por intensidad, burbujas proporcionales, mapa de calor y puntos individuales al hacer zoom. Un clic en cualquier departamento filtra todo el tablero.</p>
+              <p class="warn">El tablero puede trabajar con los datos locales incluidos o conectarse a tu base <b>PostgreSQL</b> desde la pestaña "Conexión de datos" (backend en <code>api/app.py</code>).</p>
+            </div>
+          </article>
+
+          <article class="card">
+            <header class="card-head"><h3>MODELO DE DATOS</h3></header>
+            <div class="prose">
+              <ul class="model-list">
+                <li><b>departamentos</b> — id_departamento, departamento, cantidad</li>
+                <li><b>provincias</b> — id_provincia, provincia, id_departamento, cantidad</li>
+                <li><b>distritos</b> — id_distrito, distrito, id_provincia, cantidad</li>
+                <li><b>siniestros</b> — codigo_siniestro, fecha, hora, clase, fallecidos, lesionados, vehículos dañados, id_distrito, zona, latitud, longitud, causa_factor_principal, cod_carretera</li>
+                <li><b>vehiculos</b> — codigo_vehiculo, codigo_siniestro, vehiculo, situación, seguro, estado SOAT, modalidad de transporte</li>
+                <li><b>personas</b> — codigo_persona, codigo_siniestro, tipo, gravedad, edad, sexo, licencia, dosaje etílico</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+
+        <article class="card">
+          <header class="card-head"><h3>COBERTURA</h3></header>
+          <div class="cover-row" id="coverRow"></div>
+        </article>
+      </section>
+
+      <footer class="footer">
+        <svg viewBox="0 0 24 24" class="f-ic"><path d="M12 2 4 5v7c0 5 3.4 8.8 8 10 4.6-1.2 8-5 8-10V5z"/></svg>
+        <span>Información oficial para decisiones que <b>salvan vidas</b></span>
+        <span class="dot">·</span>
+        <span class="f-brand">SINIEX <b>PERÚ</b></span>
+        <span class="f-right">© 2025 SINIEX PERÚ</span>
+      </footer>
+
+    </div>
+  </main>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="vendor/leaflet-heat.js"></script>
+<script src="js/data.js"></script>
+<script src="js/mapa.js"></script>
+<script src="js/app.js"></script>
+<script src="js/api.js"></script>
+</body>
+</html>
